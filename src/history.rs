@@ -6,21 +6,21 @@ use std::cmp::PartialEq;
 use std::vec::Vec;
 
 pub struct History {
-    conn_history: Vec<HistConnection>,
+    pub conn_history: Vec<HistConnection>,
     next_node_innov: u32,
     next_conn_innov: u32,
 }
 
-struct HistConnection {
+pub struct HistConnection {
     innov: u32,
     from: u32,
     to: u32,
 }
 
 pub struct NodeMut {
-    node: u32,
-    in_conn: u32,
-    out_conn: u32,
+    pub node: u32,
+    pub in_conn: u32,
+    pub out_conn: u32,
 }
 
 impl HistConnection {
