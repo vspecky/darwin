@@ -1,4 +1,7 @@
 pub struct Settings {
+    pub inputs: u32,
+    pub outputs: u32,
+
     pub pop_size: u32,
     pub input_size: u32,
     pub output_size: u32,
