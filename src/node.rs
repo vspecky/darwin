@@ -1,7 +1,15 @@
+use std::fmt;
+
 pub struct Node {
     pub innov: u32,
     pub x: f64,
     pub y: f64,
+}
+
+impl fmt::Debug for Node {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Node({})", self.innov)
+    }
 }
 
 impl std::cmp::PartialEq for Node {
