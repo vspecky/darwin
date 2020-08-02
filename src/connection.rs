@@ -2,6 +2,7 @@ use crate::settings::Settings;
 
 use std::clone::Clone;
 use std::cmp::PartialEq;
+use std::fmt;
 
 use rand::prelude::*;
 use rand::{self, thread_rng};
@@ -15,6 +16,12 @@ pub struct Connection {
     pub enabled: bool,
     pub from_layer: f64,
     pub to_layer: f64,
+}
+
+impl fmt::Debug for Connection {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Conn({}, {}, {})", self.innov, self.from, self.to)
+    }
 }
 
 impl PartialEq for Connection {
