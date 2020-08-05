@@ -7,17 +7,18 @@ use rand::prelude::*;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
+use std::clone::Clone;
 use std::collections::{HashMap, HashSet};
 use std::vec::Vec;
 
 // Main Genome Class
 pub struct Genome {
-    inputs: u32,            // Number of Inputs
-    outputs: u32,           // Number of Outputs
-    nodes: Vec<Node>,       // Vector of Nodes
-    conns: Vec<Connection>, // Vector of Connections
-    pub fitness: f64,       // Fitness of this Genome
-    species_id: u32,        // the Species ID of this Genome
+    inputs: u32,                // Number of Inputs
+    outputs: u32,               // Number of Outputs
+    nodes: Vec<Node>,           // Vector of Nodes
+    pub conns: Vec<Connection>, // Vector of Connections
+    pub fitness: f64,           // Fitness of this Genome
+    species_id: u32,            // the Species ID of this Genome
 }
 
 impl Genome {
@@ -68,6 +69,12 @@ impl Genome {
         genome
     }
 
+    pub fn add_fitness(&mut self, fit: f64) {
+        let fitness = self.fitness + fit;
+
+        self.fitness = if fitness < 0. { 0. } else { fitness };
+    }
+
     pub fn set_species(&mut self, id: u32) {
         self.species_id = id;
     }
@@ -112,7 +119,11 @@ impl Genome {
     pub fn mutate(&mut self, hist: &mut History, sets: &Settings) {
         let mut rng = thread_rng();
 
-        self.conns.iter_mut().for_each(|c| c.mutate_weight(sets));
+        self.conns.iter_mut().for_each(|c| {
+            if rng.gen::<f64>() < sets.wt_mut_rate {
+                c.mutate_weight(sets);
+            }
+        });
 
         if rng.gen::<f64>() < sets.conn_mut_rate {
             self.add_conn(hist);
@@ -121,6 +132,8 @@ impl Genome {
         if rng.gen::<f64>() < sets.node_mut_rate {
             self.add_node(hist);
         }
+
+        self.conns.sort_unstable_by(|a, b| a.innov.cmp(&b.innov));
     }
 
     fn add_conn(&mut self, hist: &mut History) {
@@ -247,11 +260,31 @@ impl Genome {
         });
 
         for conn in &male.conns {
-            if f_genes.contains_key(&conn.innov) && rng.gen::<f64>() < 0.5 {
-                let mut gene = (*f_genes.get(&conn.innov).unwrap()).clone();
-                if !gene.enabled && !conn.enabled && rng.gen::<f64>() < sets.off_in_both_on_rate {
-                    gene.enable();
+            if f_genes.contains_key(&conn.innov) {
+                let f_gene = *f_genes.get(&conn.innov).unwrap();
+                let mut gene = if rng.gen::<f64>() < 0.5 {
+                    f_gene.clone()
+                } else {
+                    conn.clone()
+                };
+
+                let m_e = conn.enabled;
+                let f_e = f_gene.enabled;
+
+                if (!f_e && m_e) || (!m_e && f_e) {
+                    if rng.gen::<f64>() < sets.off_gene_on_rate {
+                        gene.enable();
+                    } else {
+                        gene.disable();
+                    }
+                } else if !f_e && !m_e {
+                    if rng.gen::<f64>() < sets.off_in_both_on_rate {
+                        gene.enable();
+                    } else {
+                        gene.disable();
+                    }
                 }
+
                 offspring_genes.push(gene);
             } else {
                 offspring_genes.push(conn.clone());
@@ -327,5 +360,18 @@ mod test {
                     .len()
                     == 1
         );
+    }
+}
+
+impl Clone for Genome {
+    fn clone(&self) -> Self {
+        Self {
+            inputs: self.inputs,
+            outputs: self.outputs,
+            nodes: self.nodes.clone(),
+            conns: self.conns.clone(),
+            fitness: self.fitness,
+            species_id: self.species_id,
+        }
     }
 }
