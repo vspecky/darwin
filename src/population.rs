@@ -1,11 +1,8 @@
-use crate::connection::Connection;
 use crate::genome::Genome;
 use crate::history::History;
-use crate::node::Node;
 use crate::settings::Settings;
 use crate::species::Species;
 
-use std::collections::HashMap;
 use std::vec::{IntoIter, Vec};
 
 struct Population {
@@ -22,7 +19,6 @@ impl Population {
     pub fn new(sets: Settings) -> Self {
         let inputs = sets.inputs;
         let outputs = sets.outputs;
-        let pop_size = sets.pop_size;
         let mut pop = Self {
             sets: sets,
             species: Vec::new(),

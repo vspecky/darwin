@@ -2,7 +2,6 @@ use crate::connection::Connection;
 use crate::node::Node;
 
 use std::clone::Clone;
-use std::cmp::PartialEq;
 use std::vec::Vec;
 
 pub struct History {

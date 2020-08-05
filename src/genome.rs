@@ -1,5 +1,5 @@
 use crate::connection::Connection;
-use crate::history::{History, NodeMut};
+use crate::history::History;
 use crate::node::Node;
 use crate::settings::Settings;
 
@@ -8,7 +8,7 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 
 use std::clone::Clone;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::vec::Vec;
 
 // Main Genome Class
