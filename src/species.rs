@@ -22,6 +22,7 @@ impl Species {
         let max_fitness = head.fitness;
         let avg_fitness = head.fitness;
         head.set_species(id);
+        let repr = head.clone();
 
         let species = Self {
             genomes: vec![head],
@@ -29,7 +30,7 @@ impl Species {
             avg_fitness,
             species_id: id,
             stagnancy: 0,
-            representative: head.clone(),
+            representative: repr,
             assigned_offspring: 0,
         };
 
@@ -75,7 +76,7 @@ impl Species {
                 continue;
             }
 
-            if let (Some(g1), None) = (p1, p2) {
+            if let (Some(_), None) = (p1, p2) {
                 excess_genes += 1.;
                 p1 = genes1.next();
             }
