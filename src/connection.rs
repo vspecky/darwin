@@ -14,8 +14,6 @@ pub struct Connection {
     pub from: u32,
     pub to: u32,
     pub enabled: bool,
-    pub from_layer: f64,
-    pub to_layer: f64,
 }
 
 impl fmt::Debug for Connection {
@@ -38,8 +36,6 @@ impl Clone for Connection {
             to: self.to,
             weight: self.weight,
             enabled: self.enabled,
-            from_layer: self.from_layer,
-            to_layer: self.to_layer,
         }
     }
 }
@@ -52,19 +48,9 @@ impl Connection {
             to,
             weight,
             enabled,
-            from_layer: 0.,
-            to_layer: 1.,
         };
 
         conn
-    }
-
-    pub fn set_from_layer(&mut self, layer: f64) {
-        self.from_layer = layer;
-    }
-
-    pub fn set_to_layer(&mut self, layer: f64) {
-        self.to_layer = layer;
     }
 
     pub fn enable(&mut self) {
