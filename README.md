@@ -1,5 +1,6 @@
-# NEAT.rs (WIP)
-Implementation of the NEAT Genetic Algorithm in Rust.
+# NEAT.rs (Alpha)
+Implementation of the NEAT Genetic Algorithm in Rust.  
+Currently Debugging.
 
 ## What is NEAT?
 NEAT stands for NeuroEvolution of Augmenting Topologies. It is a Genetic Algorithm that evolves
