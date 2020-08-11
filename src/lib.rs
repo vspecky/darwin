@@ -1,7 +1,10 @@
-pub mod connection;
-pub mod genome;
-pub mod history;
-pub mod node;
-pub mod population;
-pub mod settings;
-pub mod species;
+mod connection;
+mod genome;
+mod history;
+mod node;
+mod population;
+mod settings;
+mod species;
+
+pub use population::Population;
+pub use settings::Settings;
