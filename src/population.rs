@@ -3,16 +3,17 @@ use crate::history::History;
 use crate::settings::Settings;
 use crate::species::Species;
 
-use std::vec::{IntoIter, Vec};
+use std::vec::Vec;
 
-struct Population {
+pub struct Population {
     sets: Settings,
+    population: Vec<Genome>,
     species: Vec<Species>,
     hist: History,
-    best_fitness: f64,
-    best_genome: Option<Genome>,
+    pub best_fitness: f64,
+    pub best_genome: Option<Genome>,
     next_species_id: u32,
-    generations: u64,
+    pub generations: u64,
 }
 
 impl Population {
@@ -21,6 +22,7 @@ impl Population {
         let outputs = sets.outputs;
         let mut pop = Self {
             sets: sets,
+            population: Vec::new(),
             species: Vec::new(),
             hist: History::new(inputs, outputs),
             best_fitness: 0.,
@@ -42,19 +44,36 @@ impl Population {
         self.generations = 0;
         self.hist = History::new(self.sets.inputs, self.sets.outputs);
 
-        let mut genomes = Vec::<Genome>::with_capacity(self.sets.pop_size as usize);
-
         for _ in 0..self.sets.pop_size {
             let genome = Genome::new(self.sets.inputs, self.sets.outputs, false);
-            genomes.push(genome);
+            self.population.push(genome);
         }
-
-        self.speciate_population(genomes);
     }
 
-    pub fn next_generation(&mut self) -> IntoIter<&mut Genome> {
-        self.kill_bad_species();
-        self.species.iter_mut().for_each(|s| s.fitness_sharing());
+    pub fn next_generation(&mut self) {
+        self.population
+            .sort_unstable_by(|a, b| b.fitness.partial_cmp(&a.fitness).unwrap());
+
+        let mut this_champ = self.population[0].clone();
+        if this_champ.fitness > self.best_fitness {
+            self.best_fitness = this_champ.fitness;
+            self.best_genome = Some(this_champ.clone());
+        }
+
+        this_champ.fitness = 0.;
+
+        self.speciate_population();
+
+        self.species.iter_mut().for_each(|s| {
+            s.sort_genomes();
+            s.update_stagnancy();
+            s.fitness_sharing();
+            s.cull_lower_half();
+        });
+
+        let allowed_stagnancy = self.sets.allowed_stagnancy;
+
+        self.species.retain(|s| s.stagnancy < allowed_stagnancy);
 
         let total_avg_fitness = self.species.iter().fold(0., |acc, s| acc + s.avg_fitness);
 
@@ -62,7 +81,6 @@ impl Population {
 
         self.species.iter_mut().for_each(|s| {
             s.assigned_offspring = (s.avg_fitness / total_avg_fitness * pop_size as f64) as usize;
-            s.cull_lower_half();
         });
 
         self.species.retain(|s| s.assigned_offspring > 0);
@@ -81,22 +99,9 @@ impl Population {
 
             for mut child in species.produce_offspring(new_offspring, &self.sets) {
                 child.mutate(&mut self.hist, &self.sets);
+                child.fitness = 0.;
                 progeny.push(child);
             }
-        }
-
-        self.species.sort_unstable_by(|a, b| {
-            b.genomes[0]
-                .fitness
-                .partial_cmp(&a.genomes[0].fitness)
-                .unwrap()
-        });
-
-        let this_champ = self.species[0].genomes[0].clone();
-
-        if this_champ.fitness > self.best_fitness {
-            self.best_fitness = this_champ.fitness;
-            self.best_genome = Some(this_champ.clone());
         }
 
         if progeny.len() < pop_size as usize {
@@ -107,50 +112,32 @@ impl Population {
             }
         }
 
-        self.species.iter_mut().for_each(|s| s.set_representative());
-        self.speciate_population(progeny);
-
-        self.get_citizens()
+        self.population = progeny;
+        self.generations += 1;
     }
 
-    fn kill_bad_species(&mut self) {
-        self.species.retain(|s| s.genomes.len() > 0);
-        self.species.iter_mut().for_each(|s| {
-            s.sort_genomes();
-            s.update_stagnancy();
-        });
-
-        let allowed_stagnancy = self.sets.allowed_stagnancy;
-
-        self.species.retain(|s| s.stagnancy < allowed_stagnancy);
+    pub fn get_citizens(&mut self) -> &mut Vec<Genome> {
+        &mut self.population
     }
 
-    pub fn get_citizens(&mut self) -> IntoIter<&mut Genome> {
-        let mut vec = Vec::<&mut Genome>::new();
-
-        for species in self.species.iter_mut() {
-            vec.append(&mut species.genomes.iter_mut().collect::<Vec<&mut Genome>>());
-        }
-
-        vec.into_iter()
-    }
-
-    fn speciate_population(&mut self, pop: Vec<Genome>) {
+    fn speciate_population(&mut self) {
         for species in &mut self.species {
             species.genomes.clear();
         }
 
-        'outer: for genome in pop {
+        'outer: for genome in &self.population {
             for species in &mut self.species {
-                if species.can_accomodate(&genome, &self.sets) {
-                    species.add_genome(genome);
+                if species.can_accomodate(genome, &self.sets) {
+                    species.add_genome(genome.clone());
                     continue 'outer;
                 }
             }
 
-            let new_spec = Species::new(genome, self.next_species_id);
+            let new_spec = Species::new(genome.clone(), self.next_species_id);
             self.next_species_id += 1;
             self.species.push(new_spec);
         }
+
+        self.population.clear();
     }
 }
