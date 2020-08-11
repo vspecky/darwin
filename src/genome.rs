@@ -9,6 +9,7 @@ use rand::thread_rng;
 
 use std::clone::Clone;
 use std::collections::HashMap;
+use std::fmt;
 use std::vec::Vec;
 
 // Main Genome Class
@@ -19,6 +20,26 @@ pub struct Genome {
     pub conns: Vec<Connection>, // Vector of Connections
     pub fitness: f64,           // Fitness of this Genome
     species_id: u32,            // the Species ID of this Genome
+}
+
+impl fmt::Debug for Genome {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut res = String::from("Genome {\n    Nodes {");
+
+        for node in &self.nodes {
+            res += &format!("\n        {:?},", node);
+        }
+
+        res += "\n    }\n    Conn {";
+
+        for conn in &self.conns {
+            res += &format!("\n        {:?},", conn);
+        }
+
+        res += "\n    }\n}";
+
+        write!(f, "{}", res)
+    }
 }
 
 impl Genome {
@@ -160,7 +181,7 @@ impl Genome {
                         .collect::<Vec<&Connection>>()
                         .len();
 
-                    poss_tos != conns
+                    poss_tos > conns
                 }
             })
             .collect::<Vec<&Node>>();
@@ -171,11 +192,14 @@ impl Genome {
 
         let from_node = from_node_pool.choose(&mut rng).unwrap();
 
-        let to_node = self
+        let to_node_pool = self
             .nodes
             .iter()
-            .filter(|n| n.x > from_node.x)
             .filter(|n| {
+                if n.x <= from_node.x {
+                    return false;
+                }
+
                 match self
                     .conns
                     .iter()
@@ -185,8 +209,13 @@ impl Genome {
                     None => true,
                 }
             })
-            .choose(&mut rng)
-            .unwrap();
+            .collect::<Vec<&Node>>();
+
+        if to_node_pool.len() == 0 {
+            return;
+        }
+
+        let to_node = to_node_pool.choose(&mut rng).unwrap();
 
         let innov = hist.mutate_conn(from_node, to_node);
 
