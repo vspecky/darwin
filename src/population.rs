@@ -20,9 +20,10 @@ impl Population {
     pub fn new(sets: Settings) -> Self {
         let inputs = sets.inputs;
         let outputs = sets.outputs;
+        let pop_size = sets.pop_size as usize;
         let mut pop = Self {
             sets: sets,
-            population: Vec::new(),
+            population: Vec::<Genome>::with_capacity(pop_size),
             species: Vec::new(),
             hist: History::new(inputs, outputs),
             best_fitness: 0.,
@@ -37,6 +38,7 @@ impl Population {
     }
 
     fn reset(&mut self) {
+        self.population.clear();
         self.species.clear();
         self.best_fitness = 0.;
         self.best_genome = None;
