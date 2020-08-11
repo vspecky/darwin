@@ -5,6 +5,7 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 use rand::Rng;
 
+use std::fmt;
 use std::vec::Vec;
 
 pub struct Species {
@@ -15,6 +16,17 @@ pub struct Species {
     pub stagnancy: u32,
     representative: Genome,
     pub assigned_offspring: usize,
+}
+
+impl fmt::Debug for Species {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut res = String::from(&format!("Genomes: {}\n", self.genomes.len()));
+        res += &format!("max_fitness: {}\n", self.max_fitness);
+        res += &format!("Species ID: {}\n", self.species_id);
+        res += &format!("representative: {:?}", self.representative);
+
+        write!(f, "{}", res)
+    }
 }
 
 impl Species {
@@ -160,6 +172,11 @@ impl Species {
     }
 
     pub fn update_stagnancy(&mut self) {
+        if self.genomes.len() == 0 {
+            self.stagnancy = u32::MAX;
+            return;
+        }
+
         let fitness = self.genomes[0].fitness;
 
         if fitness <= self.max_fitness {
