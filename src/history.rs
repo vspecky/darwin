@@ -67,19 +67,29 @@ impl History {
             None => {
                 let res = self.next_conn_innov;
                 self.next_conn_innov += 1;
+                self.conn_history
+                    .push(HistConnection::new(res, from.innov, to.innov));
                 res
             }
         }
     }
 
     pub fn mutate_node(&mut self, conn: &Connection) -> NodeMut {
-        let from_conns = self.conn_history.iter().filter(|c| c.from == conn.from);
-        let to_conns = self.conn_history.iter().filter(|c| c.to == conn.to);
+        let from_conns = self
+            .conn_history
+            .iter()
+            .filter(|c| c.from == conn.from)
+            .collect::<Vec<&HistConnection>>();
+        let to_conns = self
+            .conn_history
+            .iter()
+            .filter(|c| c.to == conn.to)
+            .collect::<Vec<&HistConnection>>();
 
         let mut res: Option<NodeMut> = None;
 
         'outer: for from_conn in from_conns {
-            for to_conn in to_conns.clone() {
+            for to_conn in &to_conns {
                 if from_conn.to == to_conn.from {
                     res = Some(NodeMut::new(from_conn.to, from_conn.innov, to_conn.innov));
                     break 'outer;
