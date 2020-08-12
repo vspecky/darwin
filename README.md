@@ -18,6 +18,9 @@ Networks no matter what the topology is. Additionally, the similarity measure al
 perform speciation, so we can group up similar neural networks and have them compete within their
 own niche. More Info can be gleaned by reading the original paper. (Link is down below)  
 
+## Basic Usage Example
+For a usage example, look at `tests/xor.rs`.
+
 ## Useful/Interesting Videos Showcasing NEAT
 - [SethBling's MarI/O](https://www.youtube.com/watch?v=qv6UVOQ0F44)  
 - [FlapPyBi/o](https://www.youtube.com/watch?v=H4WnRLEG73Q)  
