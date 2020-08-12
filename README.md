@@ -1,4 +1,4 @@
-# NEAT.rs (Beta)
+# Darwin (Beta)
 Implementation of the NEAT Genetic Algorithm in Rust.
 <br>
 <br>
