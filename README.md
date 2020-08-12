@@ -21,6 +21,11 @@ own niche. More Info can be gleaned by reading the original paper. (Link is down
 ## Basic Usage Example
 For a usage example, look at `tests/xor.rs`.
 
+## TODO
+- [ ] Minor Optimizations
+- [ ] Documentation
+- [ ] Genome Serialization for later use
+
 ## Useful/Interesting Videos Showcasing NEAT
 - [SethBling's MarI/O](https://www.youtube.com/watch?v=qv6UVOQ0F44)  
 - [FlapPyBi/o](https://www.youtube.com/watch?v=H4WnRLEG73Q)  
