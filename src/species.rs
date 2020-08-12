@@ -125,14 +125,6 @@ impl Species {
         self.avg_fitness = total_fitness / len;
     }
 
-    pub fn set_representative(&mut self) {
-        let mut rng = thread_rng();
-
-        let repr_idx = rng.gen_range(0, self.genomes.len());
-
-        self.representative = self.genomes[repr_idx].clone();
-    }
-
     fn select_parent(&self) -> &Genome {
         let total_fitness = self.genomes.iter().fold(0., |acc, g| acc + g.fitness);
 
