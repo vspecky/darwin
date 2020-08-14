@@ -19,7 +19,6 @@ pub struct Genome {
     nodes: Vec<Node>,           // Vector of Nodes
     pub conns: Vec<Connection>, // Vector of Connections
     pub fitness: f64,           // Fitness of this Genome
-    species_id: u32,            // the Species ID of this Genome
 }
 
 impl fmt::Debug for Genome {
@@ -50,7 +49,6 @@ impl Genome {
             nodes: Vec::with_capacity((inputs + outputs + 1) as usize),
             conns: Vec::with_capacity(((inputs + 1) * outputs) as usize),
             fitness: 0.,
-            species_id: 0,
         };
 
         let mut dy = 1. / (inputs + 1) as f64;
@@ -94,10 +92,6 @@ impl Genome {
         let fitness = self.fitness + fit;
 
         self.fitness = if fitness < 0. { 0. } else { fitness };
-    }
-
-    pub fn set_species(&mut self, id: u32) {
-        self.species_id = id;
     }
 
     pub fn feed_forward(&mut self, input: &Vec<f64>) -> Result<Vec<f64>, &'static str> {
@@ -400,7 +394,6 @@ impl Clone for Genome {
             nodes: self.nodes.clone(),
             conns: self.conns.clone(),
             fitness: self.fitness,
-            species_id: self.species_id,
         }
     }
 }
