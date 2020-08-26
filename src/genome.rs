@@ -157,26 +157,25 @@ impl Genome {
         let from_node_pool = self
             .nodes
             .iter()
-            .filter(|n| {
-                if n.x == 1. {
-                    false
-                } else {
-                    let poss_tos = self
-                        .nodes
-                        .iter()
-                        .filter(|tn| tn.x > n.x)
-                        .collect::<Vec<&Node>>()
-                        .len();
-
-                    let conns = self
-                        .conns
-                        .iter()
-                        .filter(|c| c.from == n.innov)
-                        .collect::<Vec<&Connection>>()
-                        .len();
-
-                    poss_tos > conns
+            .filter(|node| {
+                if node.x == 1. {
+                    return false;
                 }
+
+                let to_nodes = self
+                    .nodes
+                    .iter()
+                    .filter(|n| {
+                        n.x > node.x
+                            && self
+                                .conns
+                                .iter()
+                                .find(|c| c.from == node.innov && c.to == n.innov)
+                                .is_none()
+                    })
+                    .collect::<Vec<&Node>>();
+
+                to_nodes.len() > 0
             })
             .collect::<Vec<&Node>>();
 
@@ -190,24 +189,14 @@ impl Genome {
             .nodes
             .iter()
             .filter(|n| {
-                if n.x <= from_node.x {
-                    return false;
-                }
-
-                match self
-                    .conns
-                    .iter()
-                    .find(|c| c.from == from_node.innov && c.to == n.innov)
-                {
-                    Some(_) => false,
-                    None => true,
-                }
+                n.x > from_node.x
+                    && self
+                        .conns
+                        .iter()
+                        .find(|c| c.from == from_node.innov && c.to == n.innov)
+                        .is_none()
             })
             .collect::<Vec<&Node>>();
-
-        if to_node_pool.len() == 0 {
-            return;
-        }
 
         let to_node = to_node_pool.choose(&mut rng).unwrap();
 
