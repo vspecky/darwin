@@ -187,9 +187,4 @@ impl Species {
     pub fn add_genome(&mut self, gen: Genome) {
         self.genomes.push(gen);
     }
-
-    pub fn sort_genomes(&mut self) {
-        self.genomes
-            .sort_unstable_by(|a, b| b.fitness.partial_cmp(&a.fitness).unwrap());
-    }
 }
