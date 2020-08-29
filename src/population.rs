@@ -64,7 +64,6 @@ impl Population {
         self.speciate_population();
 
         self.species.iter_mut().for_each(|s| {
-            s.sort_genomes();
             s.update_stagnancy();
             s.fitness_sharing();
             s.cull_lower_half();
